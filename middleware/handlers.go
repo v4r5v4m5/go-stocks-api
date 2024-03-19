@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/v4r5v4m5/go-stocks-api/models"
 )
 
@@ -23,7 +24,7 @@ func createConnection() *sql.DB {
 	err := godotenv.Load(".env")
 
 	if err != nil {
-		log.Fatal("[-] Error loading environment file")
+		log.Fatal("[-] Error loading environment file ", err)
 	}
 
 	// sql talking func
@@ -103,7 +104,7 @@ func UpdateStock(w http.ResponseWriter, r *http.Request) {
 
 	var stock models.Stock
 
-	err = json.Decoder(r.Body).Decode(&stock)
+	err = json.NewDecoder(r.Body).Decode(&stock)
 
 	if err != nil {
 		log.Fatalf("[-] Unable to decode the request body. %v", err)
@@ -157,7 +158,7 @@ func insertStock(stock models.Stock) int64 {
 	return id
 }
 
-func getStock(id int) (models.Stock, error) {
+func getStock(id int64) (models.Stock, error) {
 	db := createConnection()
 	defer db.Close()
 
